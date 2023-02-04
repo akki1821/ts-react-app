@@ -1,59 +1,92 @@
-type CoursePart = {
+import React from 'react';
+
+interface CoursePartBase {
   name: string;
   exerciseCount: number;
-};
+}
 
-type CourseProps = {
-  courseParts: CoursePart[];
-};
+interface NormalCoursePart extends CoursePartBase {
+  type: "normal";
+  description: string;
+}
 
-const Header: React.FC<CourseProps> = (props) => {
-  return <h1>{props.courseParts[0].name}</h1>;
-};
+interface GroupProjectCoursePart extends CoursePartBase {
+  type: "groupProject";
+  groupProjectCount: number;
+}
 
-const Content: React.FC<CourseProps> = (props) => {
-  return (
-    <>
-      {props.courseParts.map((part) => (
-        <p>
-          {part.name} {part.exerciseCount}
-        </p>
-      ))}
-    </>
-  );
-};
+interface SubmissionCoursePart extends CoursePartBase {
+  type: "submission";
+  description: string;
+  exerciseSubmissionLink: string;
+}
 
-const Total: React.FC<CourseProps> = (props) => {
-  return (
-    <p>
-      Number of exercises{" "}
-      {props.courseParts.reduce((carry, part) => carry + part.exerciseCount, 0)}
-    </p>
-  );
-};
+type CoursePart = NormalCoursePart | GroupProjectCoursePart | SubmissionCoursePart;
+
+const courseParts: CoursePart[] = [
+  {
+    name: "Fundamentals",
+    exerciseCount: 10,
+    description: "This is an awesome course part",
+    type: "normal"
+  },
+  {
+    name: "Using props to pass data",
+    exerciseCount: 7,
+    groupProjectCount: 3,
+    type: "groupProject"
+  },
+  {
+    name: "Deeper type usage",
+    exerciseCount: 14,
+    description: "Confusing description",
+    exerciseSubmissionLink: "https://fake-exercise-submit.made-up-url.dev",
+    type: "submission"
+  }
+];
 
 const App: React.FC = () => {
-  const courseName = "Half Stack application development";
-  const courseParts = [
-    {
-      name: "Fundamentals",
-      exerciseCount: 10
-    },
-    {
-      name: "Using props to pass data",
-      exerciseCount: 7
-    },
-    {
-      name: "Deeper type usage",
-      exerciseCount: 14
-    }
-  ];
-
   return (
     <div>
-      <Header courseParts={courseParts} />
-      <Content courseParts={courseParts} />
-      <Total courseParts={courseParts} />
+      {courseParts.map(part => {
+        switch (part.type) {
+          case "normal":
+            return (
+              <div key={part.name}>
+                <h3>{part.name}</h3>
+                <p>{part.exerciseCount} exercises</p>
+                <p>{(part as NormalCoursePart).description}</p>
+              </div>
+            );
+          case "groupProject":
+            return (
+              <div key={part.name}>
+                <h3>{part.name}</h3>
+                <p>{part.exerciseCount} exercises</p>
+                <p>
+                  {(part as GroupProjectCoursePart).groupProjectCount} group
+                  projects
+                </p>
+              </div>
+            );
+          case "submission":
+            return (
+              <div key={part.name}>
+                <h3>{part.name}</h3>
+                <p>{part.exerciseCount} exercises</p>
+                <p>{(part as SubmissionCoursePart).description}</p>
+                <p>
+                  Submit your exercises at:{" "}
+                  <a href={(part as SubmissionCoursePart).exerciseSubmissionLink}>
+                    {(part as SubmissionCoursePart).exerciseSubmissionLink}
+                  </a>
+                </p>
+              </div>
+            );
+          default:
+            return null;
+        }
+      })}
     </div>
   );
 };
